@@ -1,0 +1,1611 @@
+<!--
+========================================================
+血脑边境保卫战 BBB Simulator Ultra Realistic
+直接保存为 index.html 即可运行
+推荐：VSCode + Live Server
+========================================================
+-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0">
+
+<title>血脑边境保卫战</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft YaHei";
+}
+
+body{
+    overflow:hidden;
+    background:#020611;
+}
+
+/* ========================= */
+/* canvas */
+/* ========================= */
+
+canvas{
+    position:absolute;
+    inset:0;
+}
+
+/* ========================= */
+/* 顶栏 */
+/* ========================= */
+
+#topBar{
+
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:100%;
+    height:56px;
+
+    z-index:50;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 18px;
+
+    background:
+        linear-gradient(
+            to right,
+            rgba(0,0,0,0.75),
+            rgba(0,20,40,0.4)
+        );
+
+    border-bottom:
+        1px solid rgba(0,255,255,0.15);
+
+    backdrop-filter: blur(10px);
+}
+
+#title{
+
+    color:#8efcff;
+
+    font-size:23px;
+
+    font-weight:bold;
+
+    letter-spacing:1px;
+}
+
+#status{
+
+    color:#ffe680;
+
+    font-size:14px;
+
+    font-weight:bold;
+}
+
+/* ========================= */
+/* 左侧 */
+/* ========================= */
+
+#leftPanel{
+
+    position:absolute;
+
+    left:12px;
+    top:68px;
+
+    width:235px;
+
+    z-index:50;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:10px;
+}
+
+.card{
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(0,0,0,0.46),
+            rgba(0,25,50,0.35)
+        );
+
+    border:
+        1px solid rgba(0,255,255,0.12);
+
+    border-radius:16px;
+
+    padding:12px;
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 0 20px rgba(0,255,255,0.06);
+}
+
+.card h2{
+
+    color:#79f8ff;
+
+    font-size:15px;
+
+    margin-bottom:10px;
+}
+
+/* ========================= */
+
+.progressItem{
+
+    margin-bottom:8px;
+}
+
+.progressItem span{
+
+    display:block;
+
+    color:#e6ffff;
+
+    font-size:10px;
+
+    margin-bottom:4px;
+}
+
+.bar{
+
+    width:100%;
+
+    height:8px;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    background:
+        rgba(255,255,255,0.08);
+}
+
+.fill{
+
+    width:0%;
+
+    height:100%;
+
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #00ffe5,
+            #008cff
+        );
+
+    box-shadow:
+        0 0 12px rgba(0,255,255,0.7);
+
+    transition:1s;
+}
+
+/* ========================= */
+
+#tips{
+
+    color:#fff6bf;
+
+    font-size:11px;
+
+    line-height:1.8;
+}
+
+/* ========================= */
+/* HUD */
+/* ========================= */
+
+#hud{
+
+    position:absolute;
+
+    left:255px;
+    bottom:12px;
+
+    z-index:50;
+
+    display:flex;
+
+    gap:14px;
+}
+
+.hudBox{
+
+    min-width:130px;
+
+    padding:10px 14px;
+
+    border-radius:14px;
+
+    color:white;
+
+    font-size:13px;
+
+    background:
+        rgba(0,0,0,0.45);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(8px);
+}
+
+/* ========================= */
+/* 右侧 */
+/* ========================= */
+
+#rightPanel{
+
+    position:absolute;
+
+    right:10px;
+    top:66px;
+
+    width:320px;
+
+    height:calc(100vh - 76px);
+
+    overflow-y:auto;
+
+    z-index:50;
+
+    padding-right:5px;
+}
+
+.section{
+
+    margin-bottom:12px;
+
+    padding:12px;
+
+    border-radius:16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(0,0,0,0.56),
+            rgba(0,20,50,0.45)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(10px);
+}
+
+.section h2{
+
+    color:#7ef8ff;
+
+    font-size:16px;
+
+    margin-bottom:10px;
+
+    text-shadow:
+        0 0 12px rgba(0,255,255,0.5);
+}
+
+.grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:7px;
+}
+
+.item{
+
+    padding:9px 6px;
+
+    border-radius:11px;
+
+    text-align:center;
+
+    cursor:pointer;
+
+    transition:0.25s;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    color:white;
+
+    user-select:none;
+}
+
+.item:hover{
+
+    transform:scale(1.06);
+
+    box-shadow:
+        0 0 18px rgba(255,255,255,0.18);
+}
+
+.good{
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0,255,180,0.22),
+            rgba(0,70,60,0.45)
+        );
+
+    border:
+        1px solid #00ffc3;
+}
+
+.bad{
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,70,110,0.24),
+            rgba(100,0,40,0.5)
+        );
+
+    border:
+        1px solid #ff5d88;
+}
+
+.pump{
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,170,0,0.24),
+            rgba(90,50,0,0.45)
+        );
+
+    border:
+        1px solid #ffc247;
+}
+
+/* ========================= */
+
+button{
+
+    width:100%;
+
+    border:none;
+
+    padding:10px;
+
+    border-radius:12px;
+
+    margin-top:7px;
+
+    cursor:pointer;
+
+    color:white;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    background:
+        linear-gradient(
+            45deg,
+            #00d2ff,
+            #005dff
+        );
+
+    transition:0.25s;
+}
+
+button:hover{
+
+    transform:scale(1.03);
+
+    box-shadow:
+        0 0 18px rgba(0,180,255,0.4);
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- ========================= -->
+
+<div id="topBar">
+
+    <div id="title">
+        Ultra Realistic Blood-Brain Barrier Simulator
+    </div>
+
+    <div id="status">
+        等待BBB形成...
+    </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- 左侧 -->
+<!-- ========================= -->
+
+<div id="leftPanel">
+
+    <div class="card">
+
+        <h2>BBB形成进程</h2>
+
+        <div class="progressItem">
+            <span>VEGF血管新生</span>
+            <div class="bar"><div id="bar1" class="fill"></div></div>
+        </div>
+
+        <div class="progressItem">
+            <span>Wnt/β-catenin诱导</span>
+            <div class="bar"><div id="bar2" class="fill"></div></div>
+        </div>
+
+        <div class="progressItem">
+            <span>Claudin-5紧密连接</span>
+            <div class="bar"><div id="bar3" class="fill"></div></div>
+        </div>
+
+        <div class="progressItem">
+            <span>PDGFD募集周细胞</span>
+            <div class="bar"><div id="bar4" class="fill"></div></div>
+        </div>
+
+        <div class="progressItem">
+            <span>星形胶质终足覆盖</span>
+            <div class="bar"><div id="bar5" class="fill"></div></div>
+        </div>
+
+        <div class="progressItem">
+            <span>BBB成熟</span>
+            <div class="bar"><div id="bar6" class="fill"></div></div>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>实时学习提示</h2>
+
+        <div id="tips">
+
+            • Claudin-5封闭细胞间隙<br>
+            • GLUT1运输葡萄糖<br>
+            • LAT1运输氨基酸<br>
+            • P-gp主动外排毒素<br>
+            • 周细胞维持BBB稳定性
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- HUD -->
+<!-- ========================= -->
+
+<div id="hud">
+
+    <div class="hudBox">
+        成功通过：
+        <span id="passCount">0</span>
+    </div>
+
+    <div class="hudBox">
+        成功阻挡：
+        <span id="blockCount">0</span>
+    </div>
+
+    <div class="hudBox">
+        外排毒素：
+        <span id="pumpCount">0</span>
+    </div>
+
+    <div class="hudBox">
+        BBB完整性：
+        <span id="health">100%</span>
+    </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- 右侧 -->
+<!-- ========================= -->
+
+<div id="rightPanel">
+
+    <div class="section">
+
+        <h2>BBB控制中心</h2>
+
+        <button onclick="startFormation()">
+            启动BBB形成
+        </button>
+
+        <button onclick="repairBBB()">
+            修复BBB
+        </button>
+
+    </div>
+
+    <!-- 营养 -->
+
+    <div class="section">
+
+        <h2>正常通过BBB</h2>
+
+        <div class="grid">
+
+            <div class="item good" onclick="spawnMolecule('葡萄糖','good')">葡萄糖</div>
+
+            <div class="item good" onclick="spawnMolecule('氧气','good')">氧气</div>
+
+            <div class="item good" onclick="spawnMolecule('CO₂','good')">CO₂</div>
+
+            <div class="item good" onclick="spawnMolecule('亮氨酸','good')">亮氨酸</div>
+
+            <div class="item good" onclick="spawnMolecule('苯丙氨酸','good')">苯丙氨酸</div>
+
+            <div class="item good" onclick="spawnMolecule('胰岛素','good')">胰岛素</div>
+
+            <div class="item good" onclick="spawnMolecule('转铁蛋白','good')">转铁蛋白</div>
+
+            <div class="item good" onclick="spawnMolecule('酮体','good')">酮体</div>
+
+            <div class="item good" onclick="spawnMolecule('水分子','good')">水分子</div>
+
+            <div class="item good" onclick="spawnMolecule('核苷酸','good')">核苷酸</div>
+
+        </div>
+
+    </div>
+
+    <!-- 被阻挡 -->
+
+    <div class="section">
+
+        <h2>被紧密连接阻挡</h2>
+
+        <div class="grid">
+
+            <div class="item bad" onclick="spawnMolecule('β淀粉样蛋白','bad')">β淀粉样蛋白</div>
+
+            <div class="item bad" onclick="spawnMolecule('Tau蛋白','bad')">Tau蛋白</div>
+
+            <div class="item bad" onclick="spawnMolecule('病毒','bad')">病毒</div>
+
+            <div class="item bad" onclick="spawnMolecule('细菌毒素','bad')">细菌毒素</div>
+
+            <div class="item bad" onclick="spawnMolecule('ROS自由基','bad')">ROS自由基</div>
+
+            <div class="item bad" onclick="spawnMolecule('炎症因子','bad')">炎症因子</div>
+
+            <div class="item bad" onclick="spawnMolecule('T细胞','bad')">T细胞</div>
+
+            <div class="item bad" onclick="spawnMolecule('重金属','bad')">重金属</div>
+
+            <div class="item bad" onclick="spawnMolecule('铅离子','bad')">铅离子</div>
+
+            <div class="item bad" onclick="spawnMolecule('汞离子','bad')">汞离子</div>
+
+        </div>
+
+    </div>
+
+    <!-- 被主动外排 -->
+
+    <div class="section">
+
+        <h2>P-gp主动外排系统</h2>
+
+        <div class="grid">
+
+            <div class="item pump" onclick="spawnMolecule('阿霉素','pump')">阿霉素</div>
+
+            <div class="item pump" onclick="spawnMolecule('紫杉醇','pump')">紫杉醇</div>
+
+            <div class="item pump" onclick="spawnMolecule('伊马替尼','pump')">伊马替尼</div>
+
+            <div class="item pump" onclick="spawnMolecule('利托那韦','pump')">利托那韦</div>
+
+            <div class="item pump" onclick="spawnMolecule('罗丹明123','pump')">罗丹明123</div>
+
+            <div class="item pump" onclick="spawnMolecule('长春新碱','pump')">长春新碱</div>
+
+            <div class="item pump" onclick="spawnMolecule('地高辛','pump')">地高辛</div>
+
+            <div class="item pump" onclick="spawnMolecule('环孢素A','pump')">环孢素A</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ====================================================== */
+/* Canvas */
+/* ====================================================== */
+
+const canvas =
+    document.getElementById("canvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+function resize(){
+
+    canvas.width =
+        window.innerWidth;
+
+    canvas.height =
+        window.innerHeight;
+}
+
+resize();
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+/* ====================================================== */
+/* BBB位置 */
+/* ====================================================== */
+
+let BBB_X =
+    window.innerWidth * 0.60;
+
+/* BBB长度更长 */
+
+const CELL_HEIGHT = 55;
+const CELL_WIDTH = 54;
+
+/* ====================================================== */
+
+const molecules=[];
+const particles=[];
+const waves=[];
+
+let endothelialCells=[];
+let astrocytes=[];
+let pericytes=[];
+
+/* ====================================================== */
+
+let passCount=0;
+let blockCount=0;
+let pumpCount=0;
+let integrity=100;
+
+/* ====================================================== */
+
+const statusText =
+    document.getElementById("status");
+
+/* ====================================================== */
+/* HUD */
+/* ====================================================== */
+
+function updateHUD(){
+
+    passCount =
+        Math.max(passCount,0);
+
+    blockCount =
+        Math.max(blockCount,0);
+
+    pumpCount =
+        Math.max(pumpCount,0);
+
+    integrity =
+        Math.max(0,
+        Math.min(100,integrity));
+
+    document.getElementById(
+        "passCount"
+    ).innerText = passCount;
+
+    document.getElementById(
+        "blockCount"
+    ).innerText = blockCount;
+
+    document.getElementById(
+        "pumpCount"
+    ).innerText = pumpCount;
+
+    document.getElementById(
+        "health"
+    ).innerText = integrity + "%";
+}
+
+/* ====================================================== */
+/* 音效 */
+/* ====================================================== */
+
+function sound(freq){
+
+    const audio =
+        new(window.AudioContext ||
+        window.webkitAudioContext)();
+
+    const osc =
+        audio.createOscillator();
+
+    const gain =
+        audio.createGain();
+
+    osc.type="triangle";
+
+    osc.frequency.value=freq;
+
+    osc.connect(gain);
+
+    gain.connect(audio.destination);
+
+    osc.start();
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        audio.currentTime+0.25
+    );
+
+    osc.stop(audio.currentTime+0.25);
+}
+
+/* ====================================================== */
+/* 粒子 */
+/* ====================================================== */
+
+class Particle{
+
+    constructor(x,y,color,size){
+
+        this.x=x;
+        this.y=y;
+
+        this.dx=
+            (Math.random()-0.5)*15;
+
+        this.dy=
+            (Math.random()-0.5)*15;
+
+        this.life=100;
+
+        this.color=color;
+
+        this.size=size;
+    }
+
+    update(){
+
+        this.x+=this.dx;
+        this.y+=this.dy;
+
+        this.life--;
+    }
+
+    draw(){
+
+        ctx.globalAlpha=
+            this.life/100;
+
+        ctx.fillStyle=
+            this.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            this.x,
+            this.y,
+            this.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.globalAlpha=1;
+    }
+}
+
+/* ====================================================== */
+/* 波纹 */
+/* ====================================================== */
+
+class Wave{
+
+    constructor(x,y,color){
+
+        this.x=x;
+        this.y=y;
+
+        this.r=10;
+        this.life=60;
+
+        this.color=color;
+    }
+
+    update(){
+
+        this.r+=4;
+
+        this.life--;
+    }
+
+    draw(){
+
+        ctx.globalAlpha=
+            this.life/60;
+
+        ctx.strokeStyle=
+            this.color;
+
+        ctx.lineWidth=3;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            this.x,
+            this.y,
+            this.r,
+            0,
+            Math.PI*2
+        );
+
+        ctx.stroke();
+
+        ctx.globalAlpha=1;
+    }
+}
+
+/* ====================================================== */
+/* 分子 */
+/* ====================================================== */
+
+class Molecule{
+
+    constructor(name,type){
+
+        this.name=name;
+        this.type=type;
+
+        this.x=270;
+
+        this.y=
+            Math.random()*
+            (canvas.height-180)+110;
+
+        this.speed=3;
+
+        this.radius=18;
+
+        this.done=false;
+    }
+
+    update(){
+
+        this.x += this.speed;
+
+        /* BBB位置 */
+
+        if(this.x > BBB_X-35 &&
+           !this.done){
+
+            this.done=true;
+
+            /* 正常通过 */
+
+            if(this.type==="good"){
+
+                this.speed=5;
+
+                passCount++;
+
+                burst(
+                    this.x,
+                    this.y,
+                    "#00ffcc"
+                );
+
+                waves.push(
+                    new Wave(
+                        this.x,
+                        this.y,
+                        "#00ffcc"
+                    )
+                );
+
+                sound(950);
+
+                showTip(
+                    "【"+this.name+"】成功通过BBB<br>" +
+                    "依赖GLUT1/LAT1等转运体。"
+                );
+            }
+
+            /* 被紧密连接阻挡 */
+
+            else if(this.type==="bad"){
+
+                this.speed=-5;
+
+                blockCount++;
+
+                integrity-=1;
+
+                burst(
+                    this.x,
+                    this.y,
+                    "#ff3366"
+                );
+
+                waves.push(
+                    new Wave(
+                        this.x,
+                        this.y,
+                        "#ff3366"
+                    )
+                );
+
+                sound(180);
+
+                showTip(
+                    "【"+this.name+"】被Claudin-5阻挡！<br>" +
+                    "紧密连接封闭细胞间隙。"
+                );
+            }
+
+            /* 被P-gp外排 */
+
+            else if(this.type==="pump"){
+
+                this.speed=-8;
+
+                pumpCount++;
+
+                burst(
+                    this.x,
+                    this.y,
+                    "#ffc247"
+                );
+
+                waves.push(
+                    new Wave(
+                        this.x,
+                        this.y,
+                        "#ffc247"
+                    )
+                );
+
+                sound(350);
+
+                showTip(
+                    "【"+this.name+"】被P-gp主动外排！<br>" +
+                    "ATP驱动外排泵将药物排回血液。"
+                );
+            }
+
+            updateHUD();
+        }
+    }
+
+    draw(){
+
+        let color="#00ffcc";
+
+        if(this.type==="bad")
+            color="#ff3366";
+
+        if(this.type==="pump")
+            color="#ffc247";
+
+        ctx.shadowBlur=35;
+        ctx.shadowColor=color;
+
+        ctx.fillStyle=color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            this.x,
+            this.y,
+            this.radius,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur=0;
+
+        ctx.fillStyle="white";
+
+        ctx.font="12px Arial";
+
+        ctx.fillText(
+            this.name,
+            this.x-32,
+            this.y-28
+        );
+    }
+}
+
+/* ====================================================== */
+/* 爆发 */
+/* ====================================================== */
+
+function burst(x,y,color){
+
+    for(let i=0;i<90;i++){
+
+        particles.push(
+            new Particle(
+                x,
+                y,
+                color,
+                Math.random()*4+1
+            )
+        );
+    }
+}
+
+/* ====================================================== */
+/* 背景 */
+/* ====================================================== */
+
+function drawBackground(){
+
+    let g=
+        ctx.createRadialGradient(
+            canvas.width/2,
+            canvas.height/2,
+            100,
+            canvas.width/2,
+            canvas.height/2,
+            canvas.width
+        );
+
+    g.addColorStop(0,"#12395a");
+    g.addColorStop(1,"#020611");
+
+    ctx.fillStyle=g;
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    /* 血流流线 */
+
+    for(let i=0;i<35;i++){
+
+        ctx.strokeStyle=
+            "rgba(0,255,255,0.05)";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            i*35+
+            Math.sin(
+                Date.now()*0.001+i
+            )*15
+        );
+
+        ctx.lineTo(
+            canvas.width,
+            i*35
+        );
+
+        ctx.stroke();
+    }
+}
+
+/* ====================================================== */
+/* BBB */
+/* ====================================================== */
+
+function drawBBB(){
+
+    BBB_X =
+        window.innerWidth<900
+        ? window.innerWidth*0.58
+        : window.innerWidth*0.60;
+
+    /* CNS区域 */
+
+    ctx.fillStyle=
+        "rgba(0,255,255,0.05)";
+
+    ctx.fillRect(
+        BBB_X+65,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    /* 血管 */
+
+    ctx.fillStyle=
+        "rgba(30,90,160,0.65)";
+
+    ctx.fillRect(
+        BBB_X-48,
+        0,
+        96,
+        canvas.height
+    );
+
+    /* 内皮细胞 */
+
+    endothelialCells.forEach(c=>{
+
+        ctx.shadowBlur=25;
+        ctx.shadowColor="#00d5ff";
+
+        ctx.fillStyle="#2ca9ff";
+
+        ctx.fillRect(
+            c.x,
+            c.y,
+            CELL_WIDTH,
+            CELL_HEIGHT
+        );
+
+        ctx.shadowBlur=0;
+
+        if(c.tight){
+
+            ctx.strokeStyle="#00ffe5";
+
+            ctx.lineWidth=5;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                c.x+56,
+                c.y+3
+            );
+
+            ctx.lineTo(
+                c.x+56,
+                c.y+52
+            );
+
+            ctx.stroke();
+
+            ctx.fillStyle="#ffffff";
+
+            ctx.font="10px Arial";
+
+            ctx.fillText(
+                "Claudin-5",
+                c.x+66,
+                c.y+28
+            );
+        }
+    });
+
+    /* 周细胞 */
+
+    pericytes.forEach(p=>{
+
+        ctx.shadowBlur=18;
+        ctx.shadowColor="#00ff99";
+
+        ctx.fillStyle="#00ff99";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            10,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur=0;
+    });
+
+    /* 星形胶质 */
+
+    astrocytes.forEach(a=>{
+
+        ctx.shadowBlur=20;
+        ctx.shadowColor="#cb98ff";
+
+        ctx.fillStyle="#cb98ff";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            a.x,
+            a.y,
+            12,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur=0;
+
+        for(let i=0;i<8;i++){
+
+            let angle=
+                i*Math.PI/4;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                a.x,
+                a.y
+            );
+
+            ctx.lineTo(
+                a.x+
+                Math.cos(angle)*30,
+
+                a.y+
+                Math.sin(angle)*30
+            );
+
+            ctx.strokeStyle="#dfc4ff";
+
+            ctx.lineWidth=2;
+
+            ctx.stroke();
+        }
+    });
+
+    /* BBB */
+
+    ctx.shadowBlur=40;
+    ctx.shadowColor="#00ffff";
+
+    ctx.fillStyle="#8efbff";
+
+    ctx.font=
+        window.innerWidth<900
+        ? "38px Arial"
+        : "52px Arial";
+
+    ctx.fillText(
+        "BBB",
+        BBB_X-25,
+        55
+    );
+
+    ctx.shadowBlur=0;
+}
+
+/* ====================================================== */
+/* BBB形成 */
+/* ====================================================== */
+
+function startFormation(){
+
+    endothelialCells=[];
+    astrocytes=[];
+    pericytes=[];
+
+    integrity=100;
+
+    updateHUD();
+
+    statusText.innerHTML=
+        "VEGF血管新生启动";
+
+    let y=70;
+
+    let interval=
+        setInterval(()=>{
+
+        endothelialCells.push({
+
+            x:BBB_X-28,
+            y:y,
+            tight:false
+        });
+
+        burst(
+            BBB_X,
+            y,
+            "#00d5ff"
+        );
+
+        updateProgress(
+            "bar1",
+            y/6
+        );
+
+        sound(500);
+
+        y += 58;
+
+        /* 屏障更长 */
+
+        if(y > canvas.height-80){
+
+            clearInterval(interval);
+
+            updateProgress(
+                "bar1",
+                100
+            );
+
+            stage2();
+        }
+
+    },160);
+}
+
+/* ====================================================== */
+
+function stage2(){
+
+    statusText.innerHTML=
+        "Wnt诱导BBB特化";
+
+    endothelialCells.forEach((c,i)=>{
+
+        setTimeout(()=>{
+
+            c.tight=true;
+
+            burst(
+                c.x+55,
+                c.y+25,
+                "#00ffe5"
+            );
+
+            updateProgress(
+                "bar2",
+                (i+1)*6
+            );
+
+            updateProgress(
+                "bar3",
+                (i+1)*6
+            );
+
+            sound(700);
+
+        },i*70);
+    });
+
+    setTimeout(stage3,1800);
+}
+
+/* ====================================================== */
+
+function stage3(){
+
+    statusText.innerHTML=
+        "PDGFD募集周细胞";
+
+    for(let i=0;i<10;i++){
+
+        setTimeout(()=>{
+
+            pericytes.push({
+
+                x:BBB_X+85,
+                y:120+i*70
+            });
+
+            burst(
+                BBB_X+85,
+                120+i*70,
+                "#00ff99"
+            );
+
+            updateProgress(
+                "bar4",
+                (i+1)*10
+            );
+
+        },i*150);
+    }
+
+    setTimeout(stage4,1800);
+}
+
+/* ====================================================== */
+
+function stage4(){
+
+    statusText.innerHTML=
+        "星形胶质终足覆盖";
+
+    for(let i=0;i<8;i++){
+
+        setTimeout(()=>{
+
+            astrocytes.push({
+
+                x:BBB_X+150,
+                y:130+i*80
+            });
+
+            burst(
+                BBB_X+150,
+                130+i*80,
+                "#cb98ff"
+            );
+
+            updateProgress(
+                "bar5",
+                (i+1)*12
+            );
+
+        },i*180);
+    }
+
+    setTimeout(()=>{
+
+        updateProgress(
+            "bar6",
+            100
+        );
+
+        statusText.innerHTML=
+            "BBB成熟完成";
+
+        burst(
+            BBB_X,
+            canvas.height/2,
+            "#00ffff"
+        );
+
+        sound(1000);
+
+    },1700);
+}
+
+/* ====================================================== */
+
+function repairBBB(){
+
+    integrity += 12;
+
+    if(integrity>100)
+        integrity=100;
+
+    updateHUD();
+
+    burst(
+        BBB_X,
+        canvas.height/2,
+        "#00ffff"
+    );
+
+    sound(850);
+
+    showTip(
+        "BBB修复完成！<br>" +
+        "Claudin-5、Occludin和ZO-1表达增强。"
+    );
+}
+
+/* ====================================================== */
+
+function spawnMolecule(name,type){
+
+    molecules.push(
+        new Molecule(name,type)
+    );
+
+    sound(420);
+}
+
+/* ====================================================== */
+
+function showTip(text){
+
+    document.getElementById(
+        "tips"
+    ).innerHTML =
+
+        text +
+
+        "<br><br>" +
+
+        "• GLUT1负责葡萄糖运输<br>" +
+        "• LAT1运输必需氨基酸<br>" +
+        "• P-gp主动外排外源毒物<br>" +
+        "• AQP4维持脑水稳态";
+}
+
+/* ====================================================== */
+
+function updateProgress(id,val){
+
+    document.getElementById(id)
+        .style.width =
+        Math.min(val,100)+"%";
+}
+
+/* ====================================================== */
+/* 动画 */
+/* ====================================================== */
+
+function animate(){
+
+    drawBackground();
+
+    drawBBB();
+
+    molecules.forEach(m=>{
+
+        m.update();
+        m.draw();
+    });
+
+    particles.forEach((p,i)=>{
+
+        p.update();
+        p.draw();
+
+        if(p.life<=0){
+
+            particles.splice(i,1);
+        }
+    });
+
+    waves.forEach((w,i)=>{
+
+        w.update();
+        w.draw();
+
+        if(w.life<=0){
+
+            waves.splice(i,1);
+        }
+    });
+
+    requestAnimationFrame(
+        animate
+    );
+}
+
+updateHUD();
+
+animate();
+
+</script>
+
+</body>
+</html>
